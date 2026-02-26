@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Волшебная Примерочная ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF6EB4;
+    --lilac: #C678DD;
+    --mint: #7FD8BE;
+    --peach: #FFB347;
+    --bg: #FFF0F8;
+    --card: #FFFFFF;
+    --shadow: rgba(198,120,221,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Quicksand', sans-serif;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 10% 20%, #ffd6ec 0%, transparent 40%),
+                      radial-gradient(circle at 90% 80%, #dcd6ff 0%, transparent 40%);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Stars */
+  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  .star {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: #ffb6e0;
+    border-radius: 50%;
+    animation: twinkle 3s infinite;
+  }
+  @keyframes twinkle { 0%,100%{opacity:.2;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
+
+  header {
+    text-align: center;
+    padding: 28px 16px 12px;
+    position: relative; z-index: 1;
+  }
+  header h1 {
+    font-family: 'Pacifico', cursive;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    background: linear-gradient(135deg, var(--pink), var(--lilac));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 6px rgba(255,110,180,.35));
+  }
+  header p { color: #b06ec7; font-size: 1rem; margin-top: 4px; }
+
+  .game-wrap {
+    display: flex;
+    gap: 20px;
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 16px 16px 40px;
+    position: relative; z-index: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* ---- CHARACTER STAGE ---- */
+  .stage {
+    flex: 0 0 280px;
+    background: linear-gradient(160deg, #fff5fb, #f3e8ff);
+    border-radius: 28px;
+    box-shadow: 0 8px 32px var(--shadow);
+    padding: 20px 16px;
+    text-align: center;
+    border: 2px solid #f9d4ef;
+  }
+  .stage h2 { font-size: .85rem; color: #c678dd; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+
+  .character-container {
+    position: relative;
+    width: 200px;
+    height: 340px;
+    margin: 0 auto;
+    user-select: none;
+  }
+
+  /* SVG character layers */
+  .char-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transition: opacity .3s;
+  }
+
+  .btn-reset {
+    margin-top: 14px;
+    background: linear-gradient(135deg, #ffb3d9, #e8a0ef);
+    border: none; border-radius: 20px;
+    padding: 8px 22px;
+    font-family: 'Quicksand', sans-serif;
+    font-size: .9rem; font-weight: 700;
+    color: white; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255,110,180,.3);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-reset:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255,110,180,.45); }
+
+  /* ---- WARDROBE ---- */
+  .wardrobe {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .category-tabs {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .tab {
+    background: white;
+    border: 2px solid #f0c0e0;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: .85rem; font-weight: 700;
+    color: #c678dd; cursor: pointer;
+    transition: all .2s;
+  }
+  .tab.active, .tab:hover {
+    background: linear-gradient(135deg, var(--pink), var(--lilac));
+    color: white; border-color: transparent;
+    box-shadow: 0 4px 12px rgba(255,110,180,.3);
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+
+  .item-card {
+    background: white;
+    border: 2.5px solid #f5d0ee;
+    border-radius: 18px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .item-card:hover {
+    transform: translateY(-4px) scale(1.04);
+    border-color: var(--pink);
+    box-shadow: 0 8px 20px rgba(255,110,180,.25);
+  }
+  .item-card.selected {
+    border-color: var(--lilac);
+    background: linear-gradient(135deg, #fff0fb, #f5e8ff);
+    box-shadow: 0 0 0 3px #e0b0ff;
+  }
+  .item-emoji { font-size: 2.4rem; line-height: 1; }
+  .item-name { font-size: .72rem; font-weight: 700; color: #a060c0; margin-top: 5px; }
+
+  /* ---- COLOR PICKER ---- */
+  .color-section {
+    margin-top: 18px;
+    background: white;
+    border-radius: 18px;
+    padding: 14px;
+    border: 2px solid #f0d0ee;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .color-section h3 { font-size: .8rem; color: #b06ec7; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+  .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .swatch:hover, .swatch.active { transform: scale(1.25); box-shadow: 0 3px 10px rgba(0,0,0,.2); }
+
+  /* Score sparkles */
+  .sparkle-container {
+    position: fixed; pointer-events: none; z-index: 100;
+  }
+  .sparkle {
+    position: absolute;
+    font-size: 1.4rem;
+    animation: floatUp 1.2s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(.5); }
+  }
+
+  /* Style score */
+  .score-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: white; border-radius: 16px;
+    padding: 10px 16px; margin-top: 14px;
+    border: 2px solid #f0d0ee;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .score-label { font-size: .8rem; font-weight: 700; color: #b06ec7; }
+  .score-stars { font-size: 1.2rem; }
+  .score-msg { font-size: .8rem; color: #c678dd; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<header>
+  <h1>✨ Волшебная Примерочная ✨</h1>
+  <p>Одень свою принцессу в самый стильный наряд!</p>
+</header>
+
+<div class="game-wrap">
+
+  <!-- CHARACTER STAGE -->
+  <div class="stage">
+    <h2>👗 Мой образ</h2>
+    <div class="character-container" id="character">
+
+      <!-- SINGLE SVG with correct layer order -->
+      <svg class="char-layer" viewBox="0 0 200 340" id="main-svg">
+
+        <!-- 1. HAIR BACK (behind body) -->
+        <g id="hair-back-group">
+          <ellipse cx="100" cy="100" rx="42" ry="46" fill="#FF8ED4"/>
+          <rect x="58" y="100" width="22" height="100" rx="11" fill="#FF8ED4"/>
+          <rect x="120" y="100" width="22" height="100" rx="11" fill="#FF8ED4"/>
+        </g>
+
+        <!-- 2. BODY BASE -->
+        <ellipse cx="100" cy="320" rx="45" ry="18" fill="#f0c8a0" opacity=".3"/>
+        <rect x="78" y="240" width="20" height="80" rx="10" fill="#f5d0a0"/>
+        <rect x="102" y="240" width="20" height="80" rx="10" fill="#f5d0a0"/>
+        <rect x="68" y="155" width="64" height="95" rx="14" fill="#f5d0a0"/>
+        <rect x="32" y="155" width="18" height="60" rx="9" fill="#f5d0a0"/>
+        <rect x="150" y="155" width="18" height="60" rx="9" fill="#f5d0a0"/>
+        <ellipse cx="41" cy="220" rx="10" ry="8" fill="#f5d0a0"/>
+        <ellipse cx="159" cy="220" rx="10" ry="8" fill="#f5d0a0"/>
+
+        <!-- 3. SHOES -->
+        <g id="shoes-group">
+          <ellipse cx="88" cy="320" rx="15" ry="6" fill="#FF6EB4"/>
+          <rect x="75" y="308" width="24" height="14" rx="6" fill="#FF6EB4"/>
+          <rect x="92" y="314" width="5" height="10" rx="2" fill="#e050a0"/>
+          <ellipse cx="112" cy="320" rx="15" ry="6" fill="#FF6EB4"/>
+          <rect x="99" y="308" width="24" height="14" rx="6" fill="#FF6EB4"/>
+          <rect x="116" y="314" width="5" height="10" rx="2" fill="#e050a0"/>
+        </g>
+
+        <!-- 4. BOTTOM clothing -->
+        <g id="bottom-group">
+          <path d="M65 228 Q60 290 70 315 L130 315 Q140 290 135 228 Z" fill="#C678DD"/>
+          <path d="M65 228 L135 228 Q145 248 130 255 Q100 260 70 255 Q55 248 65 228Z" fill="#D888EE"/>
+        </g>
+
+        <!-- 5. TOP clothing -->
+        <g id="top-group">
+          <rect x="65" y="155" width="70" height="80" rx="10" fill="#FF6EB4"/>
+          <rect x="30" y="155" width="22" height="55" rx="10" fill="#FF6EB4"/>
+          <rect x="148" y="155" width="22" height="55" rx="10" fill="#FF6EB4"/>
+          <path d="M80 155 Q100 170 120 155" fill="#ff90c8"/>
+          <circle cx="100" cy="185" r="4" fill="#ff90c8"/>
+          <circle cx="100" cy="200" r="4" fill="#ff90c8"/>
+        </g>
+
+        <!-- 6. NECK -->
+        <rect x="91" y="130" width="18" height="30" rx="9" fill="#f5d0a0"/>
+
+        <!-- 7. HEAD (always on top of hair back and clothes) -->
+        <ellipse cx="100" cy="115" rx="38" ry="42" fill="#f5d0a0"/>
+
+        <!-- 8. HAIR FRONT (top of head, bangs over face) -->
+        <g id="hair-front-group">
+          <rect x="62" y="82" width="76" height="28" rx="8" fill="#FF8ED4"/>
+          <ellipse cx="80" cy="88" rx="18" ry="12" fill="#FF9EDA"/>
+          <ellipse cx="118" cy="88" rx="14" ry="10" fill="#FF9EDA"/>
+        </g>
+
+        <!-- 9. FACE (always visible, drawn after hair back but face is on head ellipse) -->
+        <!-- eyes -->
+        <ellipse cx="88" cy="112" rx="5.5" ry="6.5" fill="#2a1a0f"/>
+        <ellipse cx="112" cy="112" rx="5.5" ry="6.5" fill="#2a1a0f"/>
+        <ellipse cx="88" cy="112" rx="3.5" ry="4.5" fill="#6b3fa0"/>
+        <ellipse cx="112" cy="112" rx="3.5" ry="4.5" fill="#6b3fa0"/>
+        <circle cx="89.5" cy="110" r="2" fill="white"/>
+        <circle cx="113.5" cy="110" r="2" fill="white"/>
+        <circle cx="87" cy="114" r="1" fill="white" opacity=".6"/>
+        <!-- eyelashes -->
+        <path d="M83 106 Q84 103 85 106" stroke="#2a1a0f" stroke-width="1" fill="none"/>
+        <path d="M88 104 Q88 101 89 104" stroke="#2a1a0f" stroke-width="1" fill="none"/>
+        <path d="M93 106 Q94 103 95 106" stroke="#2a1a0f" stroke-width="1" fill="none"/>
+        <path d="M107 106 Q108 103 109 106" stroke="#2a1a0f" stroke-width="1" fill="none"/>
+        <path d="M112 104 Q112 101 113 104" stroke="#2a1a0f" stroke-width="1" fill="none"/>
+        <path d="M117 106 Q118 103 119 106" stroke="#2a1a0f" stroke-width="1" fill="none"/>
+        <!-- eyebrows -->
+        <path d="M82 104 Q88 100 94 104" stroke="#5a3a20" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M106 104 Q112 100 118 104" stroke="#5a3a20" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- nose -->
+        <ellipse cx="100" cy="120" rx="3" ry="2.5" fill="#e0a880" opacity=".7"/>
+        <!-- lips -->
+        <path d="M90 130 Q95 127 100 130 Q105 127 110 130" stroke="#e06080" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M90 130 Q100 137 110 130" stroke="#e06080" stroke-width="2" fill="#ffb3c6" opacity=".7" stroke-linecap="round"/>
+        <!-- blush -->
+        <ellipse cx="79" cy="122" rx="8" ry="5" fill="#ffb0c0" opacity=".45"/>
+        <ellipse cx="121" cy="122" rx="8" ry="5" fill="#ffb0c0" opacity=".45"/>
+
+        <!-- 10. ACCESSORIES (on top of everything) -->
+        <g id="acc-group"></g>
+
+      </svg>
+
+    </div>
+    <button class="btn-reset" onclick="resetAll()">🔄 Сбросить образ</button>
+
+    <div class="score-bar">
+      <span class="score-label">Стиль:</span>
+      <span class="score-stars" id="score-stars">⭐⭐⭐</span>
+      <span class="score-msg" id="score-msg">Отлично!</span>
+    </div>
+  </div>
+
+  <!-- WARDROBE PANEL -->
+  <div class="wardrobe">
+    <div class="category-tabs" id="tabs"></div>
+    <div class="items-grid" id="items-grid"></div>
+
+    <div class="color-section">
+      <h3>🎨 Цвет одежды</h3>
+      <div class="color-swatches" id="swatches"></div>
+    </div>
+  </div>
+</div>
+
+<div class="sparkle-container" id="sparkles"></div>
+
+<script>
+// ===== DATA =====
+const categories = [
+  { id: 'hair', label: '💇 Причёска' },
+  { id: 'top', label: '👚 Верх' },
+  { id: 'bottom', label: '👗 Низ' },
+  { id: 'shoes', label: '👠 Обувь' },
+  { id: 'acc', label: '💎 Акс.' },
+];
+
+const items = {
+  hair: [
+    { id:'h1', name:'Длинные волны', emoji:'👱‍♀️',
+      back: (c) => `
+        <ellipse cx="100" cy="105" rx="42" ry="48" fill="${c}"/>
+        <rect x="57" y="105" width="23" height="120" rx="11" fill="${c}"/>
+        <rect x="120" y="105" width="23" height="120" rx="11" fill="${c}"/>
+        <path d="M57 180 Q46 215 58 240" stroke="${c}" stroke-width="18" fill="none" stroke-linecap="round"/>
+        <path d="M143 180 Q154 215 142 240" stroke="${c}" stroke-width="18" fill="none" stroke-linecap="round"/>
+      `,
+      front: (c) => `
+        <rect x="62" y="72" width="76" height="30" rx="10" fill="${c}"/>
+        <ellipse cx="80" cy="88" rx="18" ry="13" fill="${c}"/>
+        <ellipse cx="120" cy="88" rx="16" ry="11" fill="${c}"/>
+      `},
+    { id:'h2', name:'Хвостик', emoji:'🐴',
+      back: (c) => `
+        <ellipse cx="100" cy="105" rx="42" ry="48" fill="${c}"/>
+        <path d="M138 95 Q170 80 166 135 Q161 165 148 185" stroke="${c}" stroke-width="17" fill="none" stroke-linecap="round"/>
+        <circle cx="143" cy="90" r="9" fill="#FFB347"/>
+      `,
+      front: (c) => `
+        <rect x="62" y="72" width="76" height="30" rx="10" fill="${c}"/>
+        <ellipse cx="80" cy="88" rx="18" ry="13" fill="${c}"/>
+        <ellipse cx="118" cy="88" rx="14" ry="10" fill="${c}"/>
+      `},
+    { id:'h3', name:'Каре', emoji:'💁‍♀️',
+      back: (c) => `
+        <ellipse cx="100" cy="105" rx="42" ry="48" fill="${c}"/>
+        <rect x="57" y="105" width="23" height="58" rx="4" fill="${c}"/>
+        <rect x="120" y="105" width="23" height="58" rx="4" fill="${c}"/>
+        <rect x="57" y="155" width="86" height="14" rx="7" fill="${c}"/>
+      `,
+      front: (c) => `
+        <rect x="62" y="72" width="76" height="30" rx="10" fill="${c}"/>
+        <ellipse cx="78" cy="90" rx="18" ry="12" fill="${c}"/>
+        <ellipse cx="120" cy="90" rx="16" ry="10" fill="${c}"/>
+      `},
+    { id:'h4', name:'Кудри', emoji:'🌀',
+      back: (c) => `
+        <ellipse cx="100" cy="105" rx="42" ry="48" fill="${c}"/>
+        <ellipse cx="61" cy="165" rx="15" ry="22" fill="${c}"/>
+        <ellipse cx="139" cy="165" rx="15" ry="22" fill="${c}"/>
+        <ellipse cx="59" cy="192" rx="12" ry="16" fill="${c}"/>
+        <ellipse cx="141" cy="192" rx="12" ry="16" fill="${c}"/>
+      `,
+      front: (c) => `
+        <rect x="62" y="72" width="76" height="30" rx="10" fill="${c}"/>
+        <ellipse cx="78" cy="88" rx="20" ry="13" fill="${c}"/>
+        <ellipse cx="122" cy="88" rx="18" ry="12" fill="${c}"/>
+      `},
+    { id:'h5', name:'Пучок', emoji:'🎀',
+      back: (c) => `
+        <ellipse cx="100" cy="108" rx="40" ry="42" fill="${c}"/>
+        <ellipse cx="100" cy="68" rx="22" ry="17" fill="${c}"/>
+        <ellipse cx="80" cy="64" rx="14" ry="10" fill="#FF6EB4" opacity=".8"/>
+        <ellipse cx="120" cy="64" rx="14" ry="10" fill="#FF6EB4" opacity=".8"/>
+        <circle cx="100" cy="66" r="7" fill="#C678DD"/>
+      `,
+      front: (c) => `
+        <rect x="63" y="74" width="74" height="28" rx="10" fill="${c}"/>
+      `},
+    { id:'h6', name:'Косички', emoji:'🎠',
+      back: (c) => `
+        <ellipse cx="100" cy="105" rx="42" ry="48" fill="${c}"/>
+        <path d="M64 122 Q53 155 61 185 Q67 215 61 245" stroke="${c}" stroke-width="13" fill="none" stroke-linecap="round"/>
+        <path d="M136 122 Q147 155 139 185 Q133 215 139 245" stroke="${c}" stroke-width="13" fill="none" stroke-linecap="round"/>
+        <circle cx="61" cy="247" r="8" fill="#FFB347"/>
+        <circle cx="139" cy="247" r="8" fill="#FFB347"/>
+      `,
+      front: (c) => `
+        <rect x="62" y="72" width="76" height="30" rx="10" fill="${c}"/>
+        <ellipse cx="78" cy="88" rx="18" ry="12" fill="${c}"/>
+        <ellipse cx="122" cy="88" rx="16" ry="11" fill="${c}"/>
+      `},
+  ],
+  top: [
+    { id:'t1', name:'Футболка', emoji:'👕', svg: (c) => `
+      <rect x="65" y="155" width="70" height="80" rx="10" fill="${c}"/>
+      <rect x="30" y="155" width="22" height="55" rx="10" fill="${c}"/>
+      <rect x="148" y="155" width="22" height="55" rx="10" fill="${c}"/>
+      <path d="M80 155 Q100 170 120 155" fill="${lighten(c)}"/>
+    `},
+    { id:'t2', name:'Блузка', emoji:'👔', svg: (c) => `
+      <rect x="65" y="152" width="70" height="85" rx="8" fill="${c}"/>
+      <rect x="30" y="152" width="20" height="60" rx="8" fill="${c}"/>
+      <rect x="150" y="152" width="20" height="60" rx="8" fill="${c}"/>
+      <rect x="95" y="152" width="10" height="85" fill="${lighten(c)}" opacity=".4"/>
+      <circle cx="100" cy="170" r="3" fill="white"/>
+      <circle cx="100" cy="185" r="3" fill="white"/>
+      <circle cx="100" cy="200" r="3" fill="white"/>
+      <circle cx="100" cy="215" r="3" fill="white"/>
+      <path d="M78 152 L100 165 L122 152" fill="${lighten(c)}"/>
+    `},
+    { id:'t3', name:'Топик', emoji:'🎽', svg: (c) => `
+      <rect x="72" y="155" width="56" height="75" rx="8" fill="${c}"/>
+      <path d="M72 155 L65 170 L72 175Z" fill="${c}"/>
+      <path d="M128 155 L135 170 L128 175Z" fill="${c}"/>
+      <path d="M80 155 Q100 168 120 155" fill="${lighten(c)}"/>
+      <path d="M85 175 Q100 180 115 175" stroke="white" stroke-width="2" fill="none" opacity=".5"/>
+    `},
+    { id:'t4', name:'Свитер', emoji:'🧥', svg: (c) => `
+      <rect x="60" y="152" width="80" height="90" rx="14" fill="${c}"/>
+      <rect x="25" y="152" width="22" height="70" rx="11" fill="${c}"/>
+      <rect x="153" y="152" width="22" height="70" rx="11" fill="${c}"/>
+      <rect x="60" y="235" width="80" height="8" rx="4" fill="${darken(c)}"/>
+      <rect x="25" y="215" width="22" height="7" rx="3" fill="${darken(c)}"/>
+      <rect x="153" y="215" width="22" height="7" rx="3" fill="${darken(c)}"/>
+      <path d="M82 152 Q100 165 118 152" fill="${lighten(c)}" opacity=".6"/>
+    `},
+    { id:'t5', name:'Платье', emoji:'👘', svg: (c) => `
+      <path d="M68 152 Q62 180 60 230 Q58 270 65 310 L135 310 Q142 270 140 230 Q138 180 132 152Z" fill="${c}"/>
+      <rect x="28" y="152" width="20" height="65" rx="10" fill="${c}"/>
+      <rect x="152" y="152" width="20" height="65" rx="10" fill="${c}"/>
+      <path d="M80 152 Q100 168 120 152" fill="${lighten(c)}" opacity=".7"/>
+      <path d="M65 210 Q100 220 135 210" stroke="${lighten(c)}" stroke-width="3" fill="none" opacity=".6"/>
+      <path d="M63 240 Q100 252 137 240" stroke="${lighten(c)}" stroke-width="3" fill="none" opacity=".6"/>
+    `},
+    { id:'t6', name:'Пиджак', emoji:'🤵‍♀️', svg: (c) => `
+      <rect x="62" y="152" width="76" height="88" rx="10" fill="${c}"/>
+      <rect x="26" y="152" width="22" height="65" rx="10" fill="${c}"/>
+      <rect x="152" y="152" width="22" height="65" rx="10" fill="${c}"/>
+      <polygon points="92,152 100,175 108,152" fill="${lighten(c)}"/>
+      <rect x="62" y="152" width="12" height="88" fill="${lighten(c)}" opacity=".25"/>
+      <rect x="126" y="152" width="12" height="88" fill="${darken(c)}" opacity=".15"/>
+      <circle cx="76" cy="195" r="4" fill="${lighten(c)}"/>
+      <circle cx="76" cy="210" r="4" fill="${lighten(c)}"/>
+    `},
+  ],
+  bottom: [
+    { id:'b1', name:'Юбка', emoji:'👗', svg: (c) => `
+      <path d="M65 228 Q60 290 70 315 L130 315 Q140 290 135 228 Z" fill="${c}"/>
+      <path d="M65 228 L135 228 Q145 248 130 255 Q100 260 70 255 Q55 248 65 228Z" fill="${lighten(c)}"/>
+    `},
+    { id:'b2', name:'Джинсы', emoji:'👖', svg: (c) => `
+      <rect x="70" y="228" width="26" height="88" rx="8" fill="${c}"/>
+      <rect x="104" y="228" width="26" height="88" rx="8" fill="${c}"/>
+      <rect x="68" y="225" width="64" height="18" rx="6" fill="${darken(c)}"/>
+      <line x1="83" y1="225" x2="83" y2="315" stroke="${darken(c)}" stroke-width="1.5"/>
+      <line x1="117" y1="225" x2="117" y2="315" stroke="${darken(c)}" stroke-width="1.5"/>
+      <rect x="90" y="228" width="20" height="10" rx="3" fill="${lighten(c)}" opacity=".4"/>
+    `},
+    { id:'b3', name:'Шорты', emoji:'🩳', svg: (c) => `
+      <rect x="70" y="228" width="26" height="50" rx="8" fill="${c}"/>
+      <rect x="104" y="228" width="26" height="50" rx="8" fill="${c}"/>
+      <rect x="68" y="225" width="64" height="16" rx="6" fill="${darken(c)}"/>
+      <path d="M96 228 L100 275 L104 228Z" fill="${lighten(c)}" opacity=".3"/>
+    `},
+    { id:'b4', name:'Пышная юбка', emoji:'🌸', svg: (c) => `
+      <path d="M72 228 Q45 265 50 315 L150 315 Q155 265 128 228Z" fill="${c}"/>
+      <path d="M72 228 L128 228 Q140 248 122 258 Q100 265 78 258 Q60 248 72 228Z" fill="${lighten(c)}"/>
+      <path d="M50 285 Q70 278 90 285 Q110 292 130 285 Q150 278 150 285" stroke="${lighten(c)}" stroke-width="4" fill="none" opacity=".5"/>
+    `},
+    { id:'b5', name:'Леггинсы', emoji:'🩱', svg: (c) => `
+      <rect x="74" y="228" width="20" height="88" rx="6" fill="${c}"/>
+      <rect x="106" y="228" width="20" height="88" rx="6" fill="${c}"/>
+      <rect x="70" y="225" width="60" height="16" rx="6" fill="${darken(c)}"/>
+      <line x1="84" y1="225" x2="84" y2="316" stroke="${lighten(c)}" stroke-width="1.5" opacity=".4"/>
+      <line x1="116" y1="225" x2="116" y2="316" stroke="${lighten(c)}" stroke-width="1.5" opacity=".4"/>
+    `},
+    { id:'b6', name:'Мини-юбка', emoji:'✨', svg: (c) => `
+      <path d="M68 228 Q62 258 70 270 L130 270 Q138 258 132 228Z" fill="${c}"/>
+      <path d="M68 228 L132 228 Q142 242 128 248 Q100 254 72 248 Q58 242 68 228Z" fill="${lighten(c)}"/>
+    `},
+  ],
+  shoes: [
+    { id:'s1', name:'Туфли', emoji:'👠', svg: (c) => `
+      <ellipse cx="88" cy="320" rx="15" ry="6" fill="${c}"/>
+      <rect x="75" y="308" width="24" height="14" rx="6" fill="${c}"/>
+      <rect x="92" y="314" width="5" height="10" rx="2" fill="${darken(c)}"/>
+      <ellipse cx="112" cy="320" rx="15" ry="6" fill="${c}"/>
+      <rect x="99" y="308" width="24" height="14" rx="6" fill="${c}"/>
+      <rect x="116" y="314" width="5" height="10" rx="2" fill="${darken(c)}"/>
+    `},
+    { id:'s2', name:'Кроссовки', emoji:'👟', svg: (c) => `
+      <rect x="74" y="308" width="26" height="14" rx="7" fill="${c}"/>
+      <rect x="72" y="316" width="28" height="8" rx="4" fill="white"/>
+      <path d="M76 308 Q88 305 100 308" stroke="${lighten(c)}" stroke-width="2" fill="none"/>
+      <rect x="100" y="308" width="26" height="14" rx="7" fill="${c}"/>
+      <rect x="98" y="316" width="28" height="8" rx="4" fill="white"/>
+      <path d="M102 308 Q114 305 126 308" stroke="${lighten(c)}" stroke-width="2" fill="none"/>
+    `},
+    { id:'s3', name:'Сапожки', emoji:'👢', svg: (c) => `
+      <rect x="75" y="285" width="22" height="38" rx="8" fill="${c}"/>
+      <rect x="72" y="316" width="26" height="8" rx="4" fill="${darken(c)}"/>
+      <rect x="99" y="285" width="22" height="38" rx="8" fill="${c}"/>
+      <rect x="96" y="316" width="26" height="8" rx="4" fill="${darken(c)}"/>
+    `},
+    { id:'s4', name:'Балетки', emoji:'🩰', svg: (c) => `
+      <ellipse cx="87" cy="318" rx="14" ry="7" fill="${c}"/>
+      <path d="M80 315 Q87 308 94 315" fill="${lighten(c)}"/>
+      <ellipse cx="113" cy="318" rx="14" ry="7" fill="${c}"/>
+      <path d="M106 315 Q113 308 120 315" fill="${lighten(c)}"/>
+    `},
+    { id:'s5', name:'Угги', emoji:'🪬', svg: (c) => `
+      <rect x="73" y="290" width="24" height="32" rx="10" fill="${c}"/>
+      <rect x="71" y="318" width="26" height="7" rx="3" fill="${darken(c)}"/>
+      <rect x="73" y="288" width="24" height="8" rx="4" fill="${lighten(c)}"/>
+      <rect x="97" y="290" width="24" height="32" rx="10" fill="${c}"/>
+      <rect x="95" y="318" width="26" height="7" rx="3" fill="${darken(c)}"/>
+      <rect x="97" y="288" width="24" height="8" rx="4" fill="${lighten(c)}"/>
+    `},
+    { id:'s6', name:'Тапочки', emoji:'🛖', svg: (c) => `
+      <ellipse cx="87" cy="320" rx="16" ry="7" fill="${c}"/>
+      <path d="M75 316 Q87 310 99 316 L99 320 L75 320Z" fill="${lighten(c)}"/>
+      <ellipse cx="113" cy="320" rx="16" ry="7" fill="${c}"/>
+      <path d="M101 316 Q113 310 125 316 L125 320 L101 320Z" fill="${lighten(c)}"/>
+    `},
+  ],
+  acc: [
+    { id:'a0', name:'Без акс.', emoji:'❌', svg: () => `` },
+    { id:'a1', name:'Корона', emoji:'👑', svg: (c) => `
+      <polygon points="100,55 88,68 80,58 76,75 124,75 120,58 112,68" fill="#FFD700"/>
+      <circle cx="100" cy="60" r="4" fill="#FF6EB4"/>
+      <circle cx="83" cy="66" r="3" fill="#C678DD"/>
+      <circle cx="117" cy="66" r="3" fill="#7FD8BE"/>
+    `},
+    { id:'a2', name:'Диадема', emoji:'💫', svg: (c) => `
+      <path d="M68 90 Q100 78 132 90" stroke="#FFD700" stroke-width="3" fill="none"/>
+      <circle cx="100" cy="78" r="6" fill="#FF6EB4"/>
+      <circle cx="82" cy="84" r="4" fill="#FFD700"/>
+      <circle cx="118" cy="84" r="4" fill="#FFD700"/>
+    `},
+    { id:'a3', name:'Бантик', emoji:'🎀', svg: (c) => `
+      <ellipse cx="84" cy="84" rx="14" ry="9" fill="${c}" opacity=".9"/>
+      <ellipse cx="116" cy="84" rx="14" ry="9" fill="${c}" opacity=".9"/>
+      <circle cx="100" cy="84" r="7" fill="${lighten(c)}"/>
+    `},
+    { id:'a4', name:'Ожерелье', emoji:'📿', svg: (c) => `
+      <path d="M80 147 Q100 158 120 147" stroke="${c}" stroke-width="3" fill="none"/>
+      <circle cx="100" cy="152" r="5" fill="${c}"/>
+      <circle cx="88" cy="150" r="3" fill="${lighten(c)}"/>
+      <circle cx="112" cy="150" r="3" fill="${lighten(c)}"/>
+    `},
+    { id:'a5', name:'Очки', emoji:'🕶️', svg: (c) => `
+      <rect x="76" y="106" width="20" height="14" rx="7" fill="${c}" opacity=".75"/>
+      <rect x="104" y="106" width="20" height="14" rx="7" fill="${c}" opacity=".75"/>
+      <line x1="96" y1="113" x2="104" y2="113" stroke="${darken(c)}" stroke-width="2"/>
+      <line x1="62" y1="112" x2="76" y2="113" stroke="${darken(c)}" stroke-width="2"/>
+      <line x1="138" y1="112" x2="124" y2="113" stroke="${darken(c)}" stroke-width="2"/>
+    `},
+    { id:'a6', name:'Сумочка', emoji:'👜', svg: (c) => `
+      <rect x="28" y="200" width="26" height="20" rx="6" fill="${c}"/>
+      <path d="M34 200 Q41 192 48 200" stroke="${darken(c)}" stroke-width="2" fill="none"/>
+      <line x1="34" y1="210" x2="48" y2="210" stroke="${lighten(c)}" stroke-width="1.5" opacity=".5"/>
+    `},
+  ],
+};
+
+const colors = [
+  '#FF6EB4','#C678DD','#7FD8BE','#FFB347','#FF5A5A',
+  '#5BC8F5','#F5E642','#A0D468','#E8A87C','#4A90D9',
+  '#8B5CF6','#EC4899','#10B981','#F97316','#1E293B',
+];
+
+// state
+const state = {
+  hair: 'h1', top: 't1', bottom: 'b1', shoes: 's1', acc: 'a0',
+  colors: { hair: '#FF8ED4', top: '#FF6EB4', bottom: '#C678DD', shoes: '#FF6EB4', acc: '#FFD700' },
+};
+let activeCategory = 'hair';
+
+// color helpers
+function lighten(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  const lr = Math.min(255, r+60), lg = Math.min(255, g+60), lb = Math.min(255, b+60);
+  return `#${lr.toString(16).padStart(2,'0')}${lg.toString(16).padStart(2,'0')}${lb.toString(16).padStart(2,'0')}`;
+}
+function darken(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  const lr = Math.max(0, r-50), lg = Math.max(0, g-50), lb = Math.max(0, b-50);
+  return `#${lr.toString(16).padStart(2,'0')}${lg.toString(16).padStart(2,'0')}${lb.toString(16).padStart(2,'0')}`;
+}
+
+// render SVG layer
+function renderLayer(cat) {
+  const selId = state[cat];
+  const col = state.colors[cat];
+  const item = items[cat].find(i => i.id === selId);
+  if (!item) return;
+  if (cat === 'hair') {
+    const backGrp = document.getElementById('hair-back-group');
+    const frontGrp = document.getElementById('hair-front-group');
+    if (backGrp) backGrp.innerHTML = item.back ? item.back(col) : '';
+    if (frontGrp) frontGrp.innerHTML = item.front ? item.front(col) : '';
+  } else {
+    const grp = document.getElementById(cat + '-group');
+    if (grp) grp.innerHTML = item.svg(col);
+  }
+}
+
+function renderAll() {
+  ['hair','top','bottom','shoes','acc'].forEach(renderLayer);
+}
+
+// build tabs
+function buildTabs() {
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = '';
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat.id === activeCategory ? ' active' : '');
+    btn.textContent = cat.label;
+    btn.onclick = () => { activeCategory = cat.id; buildTabs(); buildGrid(); buildSwatches(); };
+    wrap.appendChild(btn);
+  });
+}
+
+// build grid
+function buildGrid() {
+  const grid = document.getElementById('items-grid');
+  grid.innerHTML = '';
+  items[activeCategory].forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'item-card' + (state[activeCategory] === item.id ? ' selected' : '');
+    card.innerHTML = `<div class="item-emoji">${item.emoji}</div><div class="item-name">${item.name}</div>`;
+    card.onclick = () => {
+      state[activeCategory] = item.id;
+      renderLayer(activeCategory);
+      buildGrid();
+      spawnSparkles();
+      updateScore();
+    };
+    grid.appendChild(card);
+  });
+}
+
+// swatches
+function buildSwatches() {
+  const wrap = document.getElementById('swatches');
+  wrap.innerHTML = '';
+  colors.forEach(col => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (state.colors[activeCategory] === col ? ' active' : '');
+    sw.style.background = col;
+    sw.title = col;
+    sw.onclick = () => {
+      state.colors[activeCategory] = col;
+      renderLayer(activeCategory);
+      buildSwatches();
+      spawnSparkles();
+    };
+    wrap.appendChild(sw);
+  });
+}
+
+// sparkles
+function spawnSparkles() {
+  const container = document.getElementById('sparkles');
+  const emojis = ['✨','🌟','💫','🌸','💕','⭐'];
+  for (let i = 0; i < 5; i++) {
+    const el = document.createElement('div');
+    el.className = 'sparkle';
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = (Math.random() * 80 + 10) + '%';
+    el.style.top = (Math.random() * 60 + 20) + '%';
+    el.style.animationDelay = (Math.random() * 0.4) + 's';
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 1600);
+  }
+}
+
+// score
+function updateScore() {
+  const msgs = ['Супер!','Шикарно!','Великолепно!','Потрясающе!','Модница!','Стильно!'];
+  const stars = ['⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'];
+  document.getElementById('score-stars').textContent = stars[Math.floor(Math.random()*stars.length)];
+  document.getElementById('score-msg').textContent = msgs[Math.floor(Math.random()*msgs.length)];
+}
+
+// reset
+function resetAll() {
+  state.hair = 'h1'; state.top = 't1'; state.bottom = 'b1'; state.shoes = 's1'; state.acc = 'a0';
+  state.colors = { hair:'#FF8ED4', top:'#FF6EB4', bottom:'#C678DD', shoes:'#FF6EB4', acc:'#FFD700' };
+  renderAll(); buildGrid(); buildSwatches();
+  document.getElementById('score-stars').textContent = '⭐⭐⭐';
+  document.getElementById('score-msg').textContent = 'Отлично!';
+  spawnSparkles();
+}
+
+// stars bg
+function buildStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 25; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = Math.random()*3+'s';
+    s.style.animationDuration = (2+Math.random()*2)+'s';
+    container.appendChild(s);
+  }
+}
+
+// init
+buildStars();
+buildTabs();
+buildGrid();
+buildSwatches();
+renderAll();
+</script>
+</body>
+</html>
